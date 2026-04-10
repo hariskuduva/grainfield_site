@@ -335,12 +335,34 @@
 
         footer { padding: 4rem 8%; border-top: 1px solid #1a1a1a; font-size: 0.8rem; opacity: 0.4; text-align: center; }
 
+        /* --- RESPONSIVE MEDIA QUERIES (MOBILE FIXES) --- */
         @media (max-width: 900px) {
-            .split-layout, .media-row, .vertical-media { grid-template-columns: 1fr; }
+            .split-layout, .media-row, .vertical-media { grid-template-columns: 1fr; gap: 2.5rem; }
             h2 { font-size: 3.5rem; }
             .project-headline-glitch { font-size: 3.5rem; }
             .project-grid { grid-template-columns: 1fr; }
             .image-grid { max-width: 100%; }
+            nav { flex-direction: column; padding: 1.5rem 5%; gap: 1rem; }
+            nav .links { flex-wrap: wrap; justify-content: center; gap: 15px; }
+            nav .links a { margin-left: 0; }
+            section { padding: 160px 6% 60px 6%; }
+        }
+
+        @media (max-width: 480px) {
+            h2 { font-size: 2.8rem; }
+            .project-headline-glitch { font-size: 2.8rem; }
+            .highlight-glitch { font-size: 2.2rem; }
+            .nav-logo { font-size: 1.6rem; }
+            nav { padding: 1rem 5%; gap: 0.5rem; }
+            nav .links a { font-size: 0.75rem; }
+            nav .links a.projects-link { font-size: 1.1rem; }
+            .project-title { font-size: 1.8rem; text-align: center; }
+            .project-explanation { font-size: 1.05rem; }
+            .project-block { margin-bottom: 5rem; }
+            #home .intro-text { font-size: 1.1rem; line-height: 1.8; }
+            section { padding: 140px 5% 50px 5%; }
+            .media-row { padding-bottom: 2rem; gap: 1.5rem; }
+            .audio-player-container { padding: 1rem; }
         }
     </style>
 </head>
