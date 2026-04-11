@@ -6,6 +6,7 @@
     <title>grainfield | hyperfolk & sound design</title>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400&family=Handjet:wght@400;700&family=Inter:wght@300;400&display=swap" rel="stylesheet">
     <style>
+        /* --- DEFAULT (SPACEJAM) VARIABLES --- */
         :root {
             --bg-color: #0a0a0a;
             --magenta: #ff00ff;
@@ -16,9 +17,43 @@
             --light-red: #ffcccb;
             --green-yellow: #d4ff00;
             --text-main: #e0e0e0;
+            --box-bg: #151515;
+            --box-border: #222;
+            --nav-bg: rgba(10, 10, 10, 0.9);
             --font-glitch: 'Handjet', cursive;
             --font-nav: 'Inter', sans-serif;
             --font-code: 'Fira Code', monospace;
+            --ufo-green: #00ff41;
+            --audio-filter: invert(100%) hue-rotate(180deg) brightness(1.5);
+            --img-filter: grayscale(0.5) contrast(1.1) brightness(0.9) sepia(0.4) hue-rotate(260deg);
+        }
+
+        /* --- SKYFARM VARIABLES --- */
+        body.theme-skyfarm {
+            --bg-color: #87CEEB; /* Sky Blue */
+            --magenta: #d35400; /* Darker orange/yellow for contrast */
+            --violet: #f39c12; /* Dark bright yellow */
+            --green-yellow: #e67e22;
+            --text-main: #2c3e50; /* Darker text for readability */
+            --box-bg: #e0f7fa; /* Baby blue */
+            --box-border: #b2ebf2;
+            --nav-bg: rgba(135, 206, 235, 0.9);
+            --audio-filter: invert(0%) hue-rotate(0deg) brightness(1);
+            --img-filter: grayscale(0) contrast(1.1) brightness(1) sepia(0) hue-rotate(0deg);
+        }
+
+        /* --- COURTROOM VARIABLES --- */
+        body.theme-courtroom {
+            --bg-color: #4e342e; /* Dark Wood */
+            --magenta: #ffb300; /* Gold */
+            --violet: #d7ccc8; /* Beige */
+            --green-yellow: #ffcc80; /* Light Orange */
+            --text-main: #efebe9; /* Light text */
+            --box-bg: #3e2723; /* Very Dark Wood */
+            --box-border: #212121;
+            --nav-bg: rgba(78, 52, 46, 0.9);
+            --audio-filter: invert(100%) hue-rotate(150deg) brightness(1.2) sepia(0.5);
+            --img-filter: grayscale(0.3) contrast(1.2) brightness(0.8) sepia(0.8) hue-rotate(-30deg);
         }
 
         * {
@@ -34,10 +69,183 @@
             font-family: var(--font-code);
             line-height: 1.7;
             overflow-x: hidden;
+            transition: background-color 0.5s, color 0.5s;
         }
 
+        /* --- THEME SWITCHER UI --- */
+        .theme-switcher-container {
+            display: flex;
+            align-items: center;
+            margin-left: 1rem;
+        }
+
+        .theme-prompt {
+            font-family: var(--font-code);
+            font-size: 0.8rem;
+            color: var(--green-yellow);
+            cursor: pointer;
+            animation: blinkInOut 6s infinite;
+            text-transform: lowercase;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        .theme-prompt:hover {
+            color: var(--magenta);
+            animation: none;
+            opacity: 1 !important;
+        }
+
+        @keyframes blinkInOut {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+/* --- MINECRAFT MODAL (WITH PREVIEWS) --- */
+        #theme-modal-overlay {
+            display: none; 
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .mc-modal {
+            background: #c6c6c6;
+            padding: 30px;
+            border: 4px solid #fff;
+            border-right-color: #555;
+            border-bottom-color: #555;
+            width: 90%;
+            max-width: 700px;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            box-shadow: inset -4px -4px 0px 0px #8b8b8b, inset 4px 4px 0px 0px #ffffff;
+        }
+
+        .mc-title {
+            color: #333;
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            font-weight: bold;
+            text-shadow: 2px 2px #fff;
+        }
+
+        .theme-options-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .theme-card {
+            background: #8b8b8b;
+            border: 3px solid #fff;
+            border-right-color: #333;
+            border-bottom-color: #333;
+            cursor: pointer;
+            padding: 10px;
+            transition: transform 0.1s;
+        }
+
+        .theme-card:hover { transform: scale(1.05); background: #aaa; }
+
+        .theme-preview {
+            height: 100px;
+            width: 100%;
+            margin-bottom: 10px;
+            border: 2px solid #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Preview Designs */
+        .preview-spacejam { background: #0a0a0a; border-color: #ff00ff; }
+        /* Spacejam Glitch Effect */
+        .preview-spacejam::after { 
+            content: ''; position: absolute; width: 100%; height: 100%; 
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 0, 255, 0.2) 3px);
+            animation: preview-glitch 0.2s infinite;
+        }
+        @keyframes preview-glitch {
+            0% { transform: translate(0); }
+            50% { transform: translate(-2px, 2px); }
+            100% { transform: translate(2px, -2px); }
+        }
+        
+        .preview-skyfarm { background: #87CEEB; border-color: #f1c40f; }
+        .preview-skyfarm::after { content: ''; position: absolute; bottom: 0; width: 100%; height: 15px; background: #f1c40f; }
+
+       .preview-courtroom { background: #4e342e; border-color: #ffb300; }
+        
+        /* This container mimics the floating entity's scale for the preview box */
+        .preview-hammer-wrap {
+            transform: scale(0.8) rotate(45deg);
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Blocking element moved to background */
+        .preview-courtroom::before { 
+            content: ''; position: absolute; width: 30px; height: 50px; 
+            background: #3e2723; border: 1px solid #ffb300; 
+            z-index: 1; opacity: 0.5;
+        }
+        .mc-btn-label {
+            color: #fff;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            text-shadow: 1px 1px 0 #333;
+            font-weight: bold;
+        }
+
+        /* --- MOVING ENTITIES --- */
+        #floating-entity {
+            position: fixed;
+            z-index: 9999;
+            pointer-events: none;
+            transition: opacity 0.4s ease, transform 0.2s ease-out;
+            opacity: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* UFO (Spacejam) */
+        .theme-ufo { display: none; flex-direction: column; align-items: center; filter: drop-shadow(0 0 5px var(--ufo-green)); }
+        body.theme-spacejam .theme-ufo { display: flex; }
+        .ufo-top { width: 16px; height: 8px; background: var(--ufo-green); border-radius: 50% 50% 0 0; }
+        .ufo-body { width: 40px; height: 10px; background: var(--ufo-green); border-radius: 50%; position: relative; }
+        .ufo-lights { position: absolute; width: 100%; display: flex; justify-content: space-around; top: 4px; }
+        .ufo-light { width: 4px; height: 2px; background: #000; animation: ufo-blink 0.5s infinite; }
+        @keyframes ufo-blink { 50% { opacity: 0; } }
+
+        /* Cow (Skyfarm) */
+        .theme-cow { display: none; width: 45px; height: 30px; position: relative; image-rendering: pixelated; }
+        body.theme-skyfarm .theme-cow { display: block; }
+        .cow-body { position: absolute; bottom: 0; right: 0; width: 35px; height: 20px; background: white; border: 2px solid black; }
+        .cow-head { position: absolute; top: 0; left: 0; width: 15px; height: 15px; background: white; border: 2px solid black; }
+        .cow-snout { position: absolute; bottom: 0; left: 0; width: 15px; height: 6px; background: pink; border-top: 1px solid black; }
+        .cow-spot1 { position: absolute; top: 2px; right: 5px; width: 8px; height: 8px; background: black; }
+        .cow-spot2 { position: absolute; bottom: 2px; left: 15px; width: 6px; height: 6px; background: black; }
+        .cow-leg { position: absolute; bottom: -5px; width: 4px; height: 5px; background: black; }
+        .cow-leg1 { left: 10px; } .cow-leg2 { right: 5px; }
+
+        /* Hammer (Courtroom) */
+        .theme-hammer { display: none; width: 40px; height: 40px; position: relative; transform: rotate(45deg); }
+        body.theme-courtroom .theme-hammer { display: block; }
+        .hammer-handle { position: absolute; bottom: 0; left: 17px; width: 6px; height: 25px; background: #8d6e63; border: 1px solid #3e2723; }
+        .hammer-head { position: absolute; top: 5px; left: 5px; width: 30px; height: 12px; background: #5d4037; border: 1px solid #3e2723; border-radius: 2px; }
+        .hammer-band { position: absolute; top: 5px; left: 13px; width: 14px; height: 12px; border-left: 2px solid #ffb300; border-right: 2px solid #ffb300; }
+
         /* --- BACKGROUND CANVAS --- */
-        #glitch-canvas {
+        #bg-canvas {
             position: fixed;
             top: 0;
             left: 0;
@@ -47,33 +255,27 @@
             opacity: 0.4; 
             pointer-events: none;
         }
+        body.theme-skyfarm #bg-canvas { opacity: 0.8; } /* Need it slightly brighter for farm */
 
-        /* --- GLITCH LOGIC --- */
+        /* --- TEXT STYLING --- */
         .nav-logo, .highlight-glitch, .project-headline-glitch, h2 {
             font-family: var(--font-glitch);
             color: var(--magenta); 
             text-decoration: none;
             position: relative;
             display: inline-block;
+        }
+
+        body.theme-spacejam .nav-logo, 
+        body.theme-spacejam .highlight-glitch, 
+        body.theme-spacejam .project-headline-glitch, 
+        body.theme-spacejam h2 {
             animation: subtle-jitter 0.2s infinite;
         }
 
         .nav-logo { font-size: 2rem; letter-spacing: 1px; text-transform: lowercase; }
-        
-        .highlight-glitch { 
-            font-size: 3rem; 
-            line-height: 0.7; 
-            top: 6px; 
-            margin-right: 5px; 
-        }
-
-        .project-headline-glitch {
-            font-size: 5rem;
-            color: var(--violet);
-            text-align: center;
-            display: block;
-            margin: 0 auto 3rem auto;
-        }
+        .highlight-glitch { font-size: 3rem; line-height: 0.7; top: 6px; margin-right: 5px; }
+        .project-headline-glitch { font-size: 5rem; color: var(--violet); text-align: center; display: block; margin: 0 auto 3rem auto; }
 
         @keyframes subtle-jitter {
             0% { transform: translate(0); text-shadow: 1px 0.5px var(--violet); }
@@ -83,10 +285,10 @@
             100% { transform: translate(0); }
         }
 
-        .nav-logo::before, .nav-logo::after,
-        .highlight-glitch::before, .highlight-glitch::after,
-        .project-headline-glitch::before, .project-headline-glitch::after,
-        h2::before, h2::after {
+        body.theme-spacejam .nav-logo::before, body.theme-spacejam .nav-logo::after,
+        body.theme-spacejam .highlight-glitch::before, body.theme-spacejam .highlight-glitch::after,
+        body.theme-spacejam .project-headline-glitch::before, body.theme-spacejam .project-headline-glitch::after,
+        body.theme-spacejam h2::before, body.theme-spacejam h2::after {
             content: attr(data-text);
             position: absolute;
             top: 0; left: 0;
@@ -95,18 +297,12 @@
             pointer-events: none;
         }
 
-        .nav-logo::before, .highlight-glitch::before, .project-headline-glitch::before, h2::before {
-            left: 1.5px;
-            color: var(--violet);
-            clip-path: inset(10% 0 80% 0);
-            animation: subtle-slice 2.5s infinite linear alternate-reverse;
+        body.theme-spacejam .nav-logo::before, body.theme-spacejam .highlight-glitch::before, body.theme-spacejam .project-headline-glitch::before, body.theme-spacejam h2::before {
+            left: 1.5px; color: var(--violet); clip-path: inset(10% 0 80% 0); animation: subtle-slice 2.5s infinite linear alternate-reverse;
         }
 
-        .nav-logo::after, .highlight-glitch::after, .project-headline-glitch::after, h2::after {
-            left: -1.5px;
-            color: var(--text-main);
-            clip-path: inset(80% 0 10% 0);
-            animation: subtle-slice 3.5s infinite linear alternate-reverse;
+        body.theme-spacejam .nav-logo::after, body.theme-spacejam .highlight-glitch::after, body.theme-spacejam .project-headline-glitch::after, body.theme-spacejam h2::after {
+            left: -1.5px; color: var(--text-main); clip-path: inset(80% 0 10% 0); animation: subtle-slice 3.5s infinite linear alternate-reverse;
         }
 
         @keyframes subtle-slice {
@@ -116,7 +312,7 @@
             100% { clip-path: inset(40% 0 40% 0); transform: translate(0.5px); }
         }
 
-        /* --- NAVIGATION --- */
+        /* --- LAYOUT --- */
         nav {
             position: fixed;
             width: 100%;
@@ -125,11 +321,13 @@
             justify-content: space-between;
             align-items: center;
             z-index: 1000;
-            background: rgba(10, 10, 10, 0.9); 
+            background: var(--nav-bg); 
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid var(--box-border);
+            transition: background 0.5s, border-bottom 0.5s;
         }
 
+        nav .nav-left { display: flex; align-items: center; }
         nav .links { display: flex; align-items: center; }
 
         nav .links a {
@@ -154,7 +352,6 @@
         }
         nav .links a.projects-link:hover { filter: brightness(1.2); }
 
-        /* --- SECTIONS --- */
         section {
             min-height: 100vh;
             padding: 120px 8% 80px 8%;
@@ -164,27 +361,11 @@
             position: relative;
         }
 
-        h2 {
-            font-size: 4.5rem;
-            color: var(--violet);
-            margin-bottom: 2rem;
-            font-weight: 400;
-            text-transform: lowercase;
-        }
+        h2 { font-size: 4.5rem; color: var(--violet); margin-bottom: 2rem; font-weight: 400; text-transform: lowercase; }
 
-        /* --- PROJECTS PAGE LAYOUT --- */
-        #projects-subpage {
-            display: none;
-            text-align: center;
-        }
+        #projects-subpage { display: none; text-align: center; }
 
-        .project-block {
-            margin-bottom: 8rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
+        .project-block { margin-bottom: 8rem; display: flex; flex-direction: column; align-items: center; }
         .project-title { font-size: 2.5rem; color: var(--text-main); margin-bottom: 0.2rem; line-height: 1.2; }
         .project-org { font-size: 1rem; color: var(--magenta); margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 2px; }
 
@@ -198,159 +379,106 @@
             margin-bottom: 2rem;
         }
 
-        .project-grid .media-box {
-            background: #151515;
-            border: 1px solid #222;
-            aspect-ratio: 4/3;
-            overflow: hidden;
-        }
+        .project-grid .media-box { background: var(--box-bg); border: 1px solid var(--box-border); aspect-ratio: 4/3; overflow: hidden; transition: background 0.5s, border 0.5s; }
 
-        .project-grid img, .project-grid video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .a4-container { width: 100%; max-width: 500px; margin-bottom: 2rem; display: flex; justify-content: center; }
+        .a4-media-box { background: var(--box-bg); border: 1px solid var(--box-border); width: 100%; aspect-ratio: 1 / 1.414; overflow: hidden; transition: background 0.5s, border 0.5s; }
 
-        /* UPDATED DESCRIPTION STYLING */
+        .project-grid img, .project-grid video, .a4-media-box img { width: 100%; height: 100%; object-fit: cover; }
+
         .project-explanation {
             max-width: 700px;
-            font-size: 1.2rem; /* Increased size */
+            font-size: 1.2rem;
             line-height: 1.8;
-            color: var(--green-yellow); /* Matched menu color */
-            opacity: 1; /* More visible */
+            color: var(--green-yellow);
+            opacity: 1;
             text-align: left;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8); /* Added shadow for readability */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
 
-        .split-layout {
-            display: grid;
-            grid-template-columns: 1.2fr 0.8fr;
-            gap: 4rem;
-            align-items: center;
-        }
+        .split-layout { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 4rem; align-items: center; }
 
         .image-box, .media-video-box {
-            background: #151515;
-            border: 1px solid #222;
+            background: var(--box-bg);
+            border: 1px solid var(--box-border);
             display: flex;
             overflow: hidden;
             position: relative;
-            transition: border 0.3s;
+            transition: background 0.5s, border 0.5s;
         }
 
         .image-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain; 
-            filter: grayscale(0.5) contrast(1.1) brightness(0.9) sepia(0.4) hue-rotate(260deg);
+            width: 100%; height: 100%; object-fit: contain; 
+            filter: var(--img-filter);
             transition: filter 0.5s ease;
         }
-
         .image-box img:hover { filter: grayscale(0) contrast(1) brightness(1) sepia(0); }
 
         video { width: 100%; height: 100%; object-fit: cover; }
 
         .mute-toggle {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(0, 0, 0, 0.6);
-            color: var(--magenta);
-            border: 1px solid var(--magenta);
-            padding: 5px 10px;
-            font-family: var(--font-code);
-            font-size: 10px;
-            cursor: pointer;
-            z-index: 10;
-            text-transform: uppercase;
+            position: absolute; top: 15px; right: 15px; background: rgba(0, 0, 0, 0.6);
+            color: var(--magenta); border: 1px solid var(--magenta); padding: 5px 10px;
+            font-family: var(--font-code); font-size: 10px; cursor: pointer; z-index: 10;
+            text-transform: uppercase; transition: color 0.3s, border 0.3s;
         }
+        .mute-toggle:hover { background: var(--magenta); color: var(--bg-color); }
 
-        .mute-toggle:hover { background: var(--magenta); color: black; }
+        .custom-controls-container {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            padding: 10px; display: flex; align-items: center; gap: 10px;
+            z-index: 11; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .media-video-box:hover .custom-controls-container { opacity: 1; }
+
+        .seek-slider { flex-grow: 1; cursor: pointer; accent-color: var(--magenta); height: 4px; }
 
         #home .intro-text { font-size: 1.3rem; line-height: 2; position: relative; z-index: 5; }
 
         #read-more-btn {
-            display: inline-block;
-            margin-top: 15px;
-            color: var(--green-yellow);
-            text-decoration: none;
-            font-family: var(--font-glitch);
-            font-size: 1.5rem;
-            letter-spacing: 1px;
-            transition: color 0.3s;
+            display: inline-block; margin-top: 15px; color: var(--green-yellow); text-decoration: none;
+            font-family: var(--font-glitch); font-size: 1.5rem; letter-spacing: 1px; transition: color 0.3s;
         }
-        
-        #read-more-btn:hover {
-            color: var(--magenta);
-        }
+        #read-more-btn:hover { color: var(--magenta); }
 
-        .about-content p {
-            margin-bottom: 2rem;
-            font-size: 1.15rem;
-            opacity: 0.9;
-        }
+        .about-content p { margin-bottom: 2rem; font-size: 1.15rem; opacity: 0.9; }
 
-        .image-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            max-width: 450px;
-            margin: 0 auto;
-        }
+        .image-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-width: 450px; margin: 0 auto; }
 
         .media-list { display: flex; flex-direction: column; gap: 4rem; width: 100%; }
-
-        .media-row {
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 3rem;
-            align-items: center;
-            border-bottom: 1px solid #1a1a1a;
-            padding-bottom: 4rem;
-        }
-
+        .media-row { display: grid; grid-template-columns: 1fr 1.2fr; gap: 3rem; align-items: center; border-bottom: 1px solid var(--box-border); padding-bottom: 4rem; transition: border-bottom 0.5s; }
         .vertical-media { grid-template-columns: 1.4fr 0.6fr; }
 
         .media-text h3 { font-size: 1.2rem; color: var(--text-main); font-weight: 400; margin-bottom: 0.5rem; }
         .media-text p { color: var(--magenta); font-size: 0.9rem; opacity: 0.8; margin-bottom: 1rem; }
 
         .audio-player-container {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            background: rgba(17, 17, 17, 0.9);
-            padding: 1.5rem;
-            border: 1px solid #222;
-            max-height: 400px;
-            overflow-y: auto;
+            display: flex; flex-direction: column; gap: 1rem; background: var(--box-bg);
+            padding: 1.5rem; border: 1px solid var(--box-border); max-height: 400px; overflow-y: auto;
+            transition: background 0.5s, border 0.5s;
         }
-
         .audio-track { display: flex; flex-direction: column; gap: 0.3rem; }
         .audio-track label { font-size: 0.75rem; color: var(--violet); text-transform: uppercase; }
-        audio {
-            width: 100%;
-            height: 30px;
-            filter: invert(100%) hue-rotate(180deg) brightness(1.5);
-        }
+        audio { width: 100%; height: 30px; filter: var(--audio-filter); transition: filter 0.5s; }
 
-        footer { padding: 4rem 8%; border-top: 1px solid #1a1a1a; font-size: 0.8rem; opacity: 0.4; text-align: center; }
+        footer { padding: 4rem 8%; border-top: 1px solid var(--box-border); font-size: 0.8rem; opacity: 0.8; text-align: center; transition: border-top 0.5s; }
 
-        /* --- RESPONSIVE MEDIA QUERIES (MOBILE FIXES) --- */
         @media (max-width: 900px) {
             .split-layout, .media-row, .vertical-media { grid-template-columns: 1fr; gap: 2.5rem; }
-            h2 { font-size: 3.5rem; }
-            .project-headline-glitch { font-size: 3.5rem; }
+            h2, .project-headline-glitch { font-size: 3.5rem; }
             .project-grid { grid-template-columns: 1fr; }
             .image-grid { max-width: 100%; }
             nav { flex-direction: column; padding: 1.5rem 5%; gap: 1rem; }
+            nav .nav-left { flex-direction: column; gap: 0.5rem; }
+            .theme-switcher-container { margin-left: 0; }
             nav .links { flex-wrap: wrap; justify-content: center; gap: 15px; }
             nav .links a { margin-left: 0; }
             section { padding: 160px 6% 60px 6%; }
         }
 
         @media (max-width: 480px) {
-            h2 { font-size: 2.8rem; }
-            .project-headline-glitch { font-size: 2.8rem; }
+            h2, .project-headline-glitch { font-size: 2.8rem; }
             .highlight-glitch { font-size: 2.2rem; }
             .nav-logo { font-size: 1.6rem; }
             nav { padding: 1rem 5%; gap: 0.5rem; }
@@ -366,12 +494,68 @@
         }
     </style>
 </head>
-<body>
+<body class="theme-spacejam">
 
-    <canvas id="glitch-canvas"></canvas>
+<div id="theme-modal-overlay" style="display: flex;">
+        <div class="mc-modal">
+            <div class="mc-title">PICK YOUR THEME</div>
+            <div class="theme-options-grid">
+                <div class="theme-card" onclick="setTheme('spacejam')">
+                    <div class="theme-preview preview-spacejam">🛸</div>
+                    <div class="mc-btn-label">SPACEJAM</div>
+                </div>
+                <div class="theme-card" onclick="setTheme('skyfarm')">
+                    <div class="theme-preview preview-skyfarm">🐄</div>
+                    <div class="mc-btn-label">SKYFARM</div>
+                </div>
+                <div class="theme-card" onclick="setTheme('courtroom')">
+                    <div class="theme-preview preview-courtroom">
+                        <div class="preview-hammer-wrap">
+                            <div class="hammer-handle" style="position:relative; left:0; bottom:0; margin:0 auto;"></div>
+                            <div class="hammer-head" style="position:relative; top:-20px; left:-12px;"></div>
+                        </div>
+                    </div>
+                    <div class="mc-btn-label">COURTROOM</div>
+                </div>
+            </div>
+            <button class="mc-btn" onclick="closeModal()" style="background: #666; font-size: 0.8rem; padding: 5px; width: auto; margin: 0 auto;">CLOSE</button>
+        </div>
+    </div>
+
+    <div id="floating-entity">
+        <div class="theme-ufo">
+            <div class="ufo-top"></div>
+            <div class="ufo-body">
+                <div class="ufo-lights">
+                    <div class="ufo-light"></div><div class="ufo-light"></div><div class="ufo-light"></div>
+                </div>
+            </div>
+        </div>
+        <div class="theme-cow">
+            <div class="cow-body"></div>
+            <div class="cow-head"></div>
+            <div class="cow-snout"></div>
+            <div class="cow-spot1"></div>
+            <div class="cow-spot2"></div>
+            <div class="cow-leg cow-leg1"></div>
+            <div class="cow-leg cow-leg2"></div>
+        </div>
+        <div class="theme-hammer">
+            <div class="hammer-handle"></div>
+            <div class="hammer-head"></div>
+            <div class="hammer-band"></div>
+        </div>
+    </div>
+
+    <canvas id="bg-canvas"></canvas>
 
     <nav>
-        <a href="#home" class="nav-logo" data-text="grainfield" onclick="showMain()">grainfield</a>
+        <div class="nav-left">
+            <a href="#home" class="nav-logo" data-text="grainfield" onclick="showMain()">grainfield</a>
+            <div class="theme-switcher-container">
+                <span class="theme-prompt" onclick="openModal()">➔ [click here to change theme]</span>
+            </div>
+        </div>
         <div class="links">
             <a href="#home" onclick="showMain()">Home</a>
             <a href="#about" onclick="showMain()">About</a>
@@ -393,6 +577,9 @@
                 <div class="media-video-box" style="aspect-ratio: 16/9;">
                     <button class="mute-toggle" id="unmuteBtn">Unmute</button>
                     <video id="introVid" src="Grainfield Youtube Intro.mov" autoplay muted loop playsinline disablePictureInPicture></video>
+                    <div class="custom-controls-container">
+                        <input type="range" class="seek-slider" id="introSeek" value="0" step="0.1">
+                    </div>
                 </div>
             </div>
         </section>
@@ -424,7 +611,7 @@
                         <p>Sound Designer, Mix Engineer</p>
                     </div>
                     <div class="media-video-box" style="aspect-ratio: 16/9;">
-                        <video src="boy loses fire.mp4" controls controlsList="nodownload noplaybackrate"></video>
+                        <video src="BLF.mp4" controls controlsList="nodownload noplaybackrate"></video>
                     </div>
                 </div>
 
@@ -510,11 +697,12 @@
             <div class="project-block">
                 <div class="project-title">Diploma in Audio Production<br>x<br>Diploma in Music<br>[Original Song]</div>
                 <div class="project-org">LASALLE College of the Arts</div>
-                <div class="project-grid">
-                    <div class="media-box"><video src="project2-vid1.mp4" muted loop autoplay></video></div>
-                    <div class="media-box"><img src="project2-img1.jpg" alt=""></div>
-                    <div class="media-box"><img src="project2-img2.jpg" alt=""></div>
-                    <div class="media-box"><img src="project2-img3.jpg" alt=""></div>
+                <div class="media-video-box" style="width: 100%; max-width: 900px; aspect-ratio: 16/9; margin-bottom: 2rem;">
+                    <button class="mute-toggle" id="unmuteProjectBtn">Unmute</button>
+                    <video id="projectVid" src="to.ma.toes_finalcut.mp4" autoplay muted loop playsinline disablePictureInPicture></video>
+                    <div class="custom-controls-container">
+                        <input type="range" class="seek-slider" id="projectSeek" value="0" step="0.1">
+                    </div>
                 </div>
                 <div class="project-explanation">
                     Worked with music diploma students at Lasalle to create an original song.<br><br>
@@ -526,11 +714,10 @@
             <div class="project-block">
                 <div class="project-title">The Youth Station Project (SYF)</div>
                 <div class="project-org">Yishun Secondary School</div>
-                <div class="project-grid">
-                    <div class="media-box"><img src="project3-img1.jpg" alt=""></div>
-                    <div class="media-box"><img src="project3-img2.jpg" alt=""></div>
-                    <div class="media-box"><img src="project3-img3.jpg" alt=""></div>
-                    <div class="media-box"><img src="project3-img4.jpg" alt=""></div>
+                <div class="a4-container">
+                    <div class="a4-media-box">
+                        <img src="SYF.png" alt="SYF Project Media">
+                    </div>
                 </div>
                 <div class="project-explanation">
                     Collaborated and composed an original song with a school senior.<br><br>
@@ -547,78 +734,320 @@
     </footer>
 
     <script>
-        // --- IMPROVED BACKGROUND GLITCH CANVAS LOGIC ---
-        const canvas = document.getElementById('glitch-canvas');
+        // --- THEME LOGIC ---
+        let currentTheme = 'spacejam';
+        const bodyEl = document.body;
+        const modalOverlay = document.getElementById('theme-modal-overlay');
+
+        // Force modal to open immediately on page load
+        window.onload = () => {
+            modalOverlay.style.display = 'flex';
+        };
+
+        function openModal() { modalOverlay.style.display = 'flex'; }
+        function closeModal() { modalOverlay.style.display = 'none'; }
+        
+        function setTheme(theme) {
+            bodyEl.className = `theme-${theme}`;
+            currentTheme = theme;
+            
+            // Log for debugging
+            console.log("Environment Switched To: " + theme);
+            
+            closeModal();
+        }
+
+        // --- MOVING ENTITY LOGIC ---
+        const floatingEntity = document.getElementById('floating-entity');
+        let entX = 50, entY = 50, entDX = 1.2, entDY = 1.2;
+        let isScrolling = false;
+        let scrollTimeout;
+
+        window.addEventListener('scroll', () => {
+            floatingEntity.style.opacity = '0';
+            isScrolling = true;
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                floatingEntity.style.opacity = '1';
+                isScrolling = false;
+                checkTrapped(); 
+            }, 300);
+        });
+
+        function checkTrapped() {
+            const obstacles = document.querySelectorAll('p, h2, h3, h1, .nav-logo, .links a, .media-video-box, .image-box, .media-box, .audio-player-container, .a4-media-box');
+            const entRect = floatingEntity.getBoundingClientRect();
+            let overlap = false;
+
+            obstacles.forEach(el => {
+                if (el.offsetParent !== null) {
+                    const rect = el.getBoundingClientRect();
+                    if (entRect.left < rect.right + 20 && entRect.right > rect.left - 20 &&
+                        entRect.top < rect.bottom + 20 && entRect.bottom > rect.top - 20) {
+                        overlap = true;
+                    }
+                }
+            });
+
+            if (overlap) teleportToSafeZone();
+        }
+
+        function teleportToSafeZone() {
+            const side = Math.random() > 0.5 ? 'left' : 'right';
+            const margin = 30;
+            entX = (side === 'left') ? margin : window.innerWidth - 70;
+            entY = Math.random() * (window.innerHeight - 50);
+            if(window.innerWidth < 900) entY = 100; 
+        }
+
+        function moveEntity() {
+            if (!isScrolling) {
+                entX += entDX;
+                entY += entDY;
+                if (entX <= 0 || entX >= window.innerWidth - 45) entDX *= -1;
+                if (entY <= 0 || entY >= window.innerHeight - 40) entDY *= -1;
+
+                const obstacles = document.querySelectorAll('p, h2, h3, h1, .nav-logo, .links a, .media-video-box, .image-box, .media-box, .audio-player-container, .a4-media-box');
+                const entRect = floatingEntity.getBoundingClientRect();
+
+                obstacles.forEach(el => {
+                    if (el.offsetParent !== null) {
+                        const rect = el.getBoundingClientRect();
+                        if (entRect.left < rect.right + 25 && entRect.right > rect.left - 25 &&
+                            entRect.top < rect.bottom + 25 && entRect.bottom > rect.top - 25) {
+                            entDX *= -1;
+                            entDY *= -1;
+                            entX += entDX * 2;
+                            entY += entDY * 2;
+                        }
+                    }
+                });
+
+                floatingEntity.style.left = entX + 'px';
+                floatingEntity.style.top = entY + 'px';
+                
+                // Add a little sway based on theme
+                if(currentTheme === 'spacejam') {
+                    floatingEntity.style.transform = `rotate(${entDX * 10}deg)`;
+                } else if(currentTheme === 'skyfarm') {
+                    floatingEntity.style.transform = `scaleX(${entDX > 0 ? -1 : 1}) rotate(${entDY * 5}deg)`;
+                } else if(currentTheme === 'courtroom') {
+                    floatingEntity.style.transform = `rotate(${45 + (Math.sin(Date.now() / 200) * 20)}deg)`;
+                }
+            }
+            requestAnimationFrame(moveEntity);
+        }
+        
+        teleportToSafeZone(); 
+        moveEntity();
+
+        // --- CANVAS BACKGROUND LOGIC ---
+        const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let width, height;
-
-        const glitchColors = ['#ff00ff', '#8f00ff', '#4b0082', '#00008b', '#006400', '#ffcccb'];
+        let time = 0;
 
         function resize() {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
         }
-
         window.addEventListener('resize', resize);
         resize();
 
-        function drawGlitch() {
-            ctx.fillStyle = "rgba(10, 10, 10, 0.4)"; 
-            ctx.fillRect(0, 0, width, height);
+        const glitchColors = ['#ff00ff', '#8f00ff', '#4b0082', '#00008b', '#006400', '#ffcccb'];
 
-            const blockCount = 25; 
-            for (let i = 0; i < blockCount; i++) {
-                if(Math.random() > 0.8) continue; 
-
-                const x = Math.random() * width;
-                const y = Math.random() * height;
-                const w = Math.random() * 200;
-                const h = Math.random() * 4; 
-                
-                ctx.fillStyle = glitchColors[Math.floor(Math.random() * glitchColors.length)];
-                ctx.fillRect(x, y, w, h);
-            }
-
-            if (Math.random() > 0.90) {
-                ctx.fillStyle = glitchColors[Math.floor(Math.random() * glitchColors.length)];
-                ctx.fillRect(Math.random() * width, Math.random() * height, Math.random() * 400, Math.random() * 60);
-            }
-
-            ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
-            ctx.fillRect(0, Math.random() * height, width, 1);
-
-            requestAnimationFrame(drawGlitch);
+        // Entities for Skyfarm
+        let farmAnimals = [];
+        for(let i=0; i<8; i++) {
+            farmAnimals.push({
+                x: Math.random() * 2000, y: Math.random() * 1000,
+                type: Math.floor(Math.random() * 3), // 0: pig, 1: sheep, 2: chicken
+                speed: (Math.random() * 0.5) + 0.2, dir: Math.random() > 0.5 ? 1 : -1
+            });
         }
-        drawGlitch();
 
+        // Entities for Courtroom
+        let cops = [];
+        for(let i=0; i<5; i++) {
+            cops.push({ x: Math.random() * 2000, speed: (Math.random() * 1) + 0.5, dir: Math.random() > 0.5 ? 1 : -1 });
+        }
 
-        // --- ORIGINAL SITE LOGIC ---
-        const video = document.getElementById('introVid');
-        const btn = document.getElementById('unmuteBtn');
+        function renderCanvas() {
+            ctx.clearRect(0, 0, width, height);
+
+            if (currentTheme === 'spacejam') {
+                ctx.fillStyle = "rgba(10, 10, 10, 0.4)"; 
+                ctx.fillRect(0, 0, width, height);
+                for (let i = 0; i < 25; i++) {
+                    if(Math.random() > 0.8) continue; 
+                    ctx.fillStyle = glitchColors[Math.floor(Math.random() * glitchColors.length)];
+                    ctx.fillRect(Math.random() * width, Math.random() * height, Math.random() * 200, Math.random() * 4);
+                }
+            } 
+            else if (currentTheme === 'skyfarm') {
+                // Sun
+                ctx.fillStyle = "#FFD700";
+                ctx.beginPath();
+                ctx.arc(width * 0.8, height * 0.2, 80, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Wind swirls
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+                ctx.lineWidth = 4;
+                for(let w = 0; w < 5; w++) {
+                    ctx.beginPath();
+                    let offset = (time * 0.5 + w * 200) % (width + 400) - 200;
+                    ctx.moveTo(offset, height * 0.3 + Math.sin(w) * 100);
+                    ctx.bezierCurveTo(
+                        offset + 100, height * 0.2 + Math.sin(time*0.02) * 50, 
+                        offset + 200, height * 0.4, 
+                        offset + 300, height * 0.3 + Math.cos(time*0.02) * 50
+                    );
+                    ctx.stroke();
+                }
+
+                // Wheat
+                ctx.fillStyle = "#f1c40f";
+                for(let x = 0; x < width; x += 30) {
+                    let sway = Math.sin(time * 0.05 + x) * 15;
+                    ctx.fillRect(x + sway, height - 100, 4, 100);
+                }
+
+                // Animals
+                farmAnimals.forEach(a => {
+                    a.x += a.speed * a.dir;
+                    if(a.x > width + 50) a.x = -50;
+                    if(a.x < -50) a.x = width + 50;
+                    
+                    let y = (a.y % (height - 200)) + 100; // keep in middle area
+
+                    if(a.type === 0) { // Pig (Pink)
+                        ctx.fillStyle = "#ffb6c1";
+                        ctx.fillRect(a.x, y, 25, 15);
+                        ctx.fillStyle = "black";
+                        ctx.fillRect(a.dir === 1 ? a.x + 20 : a.x + 2, y + 2, 3, 3);
+                    } else if (a.type === 1) { // Sheep (White)
+                        ctx.fillStyle = "#ffffff";
+                        ctx.fillRect(a.x, y, 30, 20);
+                        ctx.fillStyle = "black";
+                        ctx.fillRect(a.dir === 1 ? a.x + 25 : a.x + 2, y + 5, 4, 4);
+                    } else { // Chicken (Red/Black)
+                        ctx.fillStyle = "#8b0000";
+                        ctx.fillRect(a.x, y, 10, 10);
+                        ctx.fillStyle = "black";
+                        ctx.fillRect(a.dir === 1 ? a.x + 7 : a.x, y, 3, 3);
+                    }
+                });
+            }
+            else if (currentTheme === 'courtroom') {
+                // Wood Panels
+                ctx.strokeStyle = "rgba(0,0,0,0.1)";
+                ctx.lineWidth = 2;
+                for(let x = 0; x < width; x += 60) {
+                    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+                }
+
+                // Judge Desk (Center Top)
+                ctx.fillStyle = "#3e2723";
+                ctx.fillRect(width/2 - 150, 50, 300, 100);
+                // Judge
+                ctx.fillStyle = "black";
+                ctx.fillRect(width/2 - 30, 20, 60, 60);
+                ctx.fillStyle = "#ffe0bd";
+                ctx.fillRect(width/2 - 15, 10, 30, 30);
+
+                // Jury Box (Left)
+                ctx.fillStyle = "#5d4037";
+                ctx.fillRect(50, 150, 200, height - 200);
+                for(let r=0; r<4; r++) {
+                    for(let c=0; c<3; c++) {
+                        ctx.fillStyle = (r+c)%2===0 ? "#ffe0bd" : "#d4a373";
+                        ctx.fillRect(80 + c*50, 200 + r*60, 20, 20);
+                    }
+                }
+
+                // Prisoner Cage (Right)
+                ctx.fillStyle = "#212121";
+                ctx.fillRect(width - 250, 150, 200, 250);
+                ctx.fillStyle = "#ff9800"; // prisoner orange
+                ctx.fillRect(width - 170, 220, 40, 100);
+                ctx.fillStyle = "#ffe0bd";
+                ctx.fillRect(width - 165, 190, 30, 30);
+                // bars
+                ctx.fillStyle = "#757575";
+                for(let b=0; b<10; b++) {
+                    ctx.fillRect(width - 250 + (b*20), 150, 5, 250);
+                }
+
+                // Police (Moving at bottom)
+                cops.forEach(c => {
+                    c.x += c.speed * c.dir;
+                    if(c.x > width + 50) c.x = -50;
+                    if(c.x < -50) c.x = width + 50;
+                    ctx.fillStyle = "#0d47a1"; // Blue uniform
+                    ctx.fillRect(c.x, height - 150, 40, 100);
+                    ctx.fillStyle = "#ffe0bd";
+                    ctx.fillRect(c.x + 5, height - 180, 30, 30);
+                    ctx.fillStyle = "#000000"; // hat
+                    ctx.fillRect(c.x, height - 185, 40, 10);
+                });
+            }
+
+            time++;
+            requestAnimationFrame(renderCanvas);
+        }
+        renderCanvas();
+
+        // --- VIDEO AND UI LOGIC ---
+        const introVideo = document.getElementById('introVid');
+        const introBtn = document.getElementById('unmuteBtn');
+        const introSeek = document.getElementById('introSeek');
+
+        const projectVideo = document.getElementById('projectVid');
+        const projectBtn = document.getElementById('unmuteProjectBtn');
+        const projectSeek = document.getElementById('projectSeek');
+        
         const mainContent = document.getElementById('main-content');
         const projectsSubpage = document.getElementById('projects-subpage');
-        
         const readMoreBtn = document.getElementById('read-more-btn');
         const readMoreContent = document.getElementById('read-more-content');
 
-        readMoreBtn.addEventListener('click', function() {
-            if (readMoreContent.style.display === 'none') {
-                readMoreContent.style.display = 'inline';
-                readMoreBtn.textContent = '[read less]';
-            } else {
-                readMoreContent.style.display = 'none';
-                readMoreBtn.textContent = '[read more]';
-            }
+        readMoreBtn.addEventListener('click', () => {
+            const isHidden = readMoreContent.style.display === 'none';
+            readMoreContent.style.display = isHidden ? 'inline' : 'none';
+            readMoreBtn.textContent = isHidden ? '[read less]' : '[read more]';
         });
 
-        btn.addEventListener('click', function() {
-            if (video.muted) {
-                video.muted = false;
-                btn.textContent = 'Mute';
-            } else {
-                video.muted = true;
-                btn.textContent = 'Unmute';
-            }
+        // Intro Video (Grainfield Intro) Logic
+        introBtn.addEventListener('click', () => {
+            introVideo.muted = !introVideo.muted;
+            introBtn.textContent = introVideo.muted ? 'Unmute' : 'Mute';
+        });
+
+        introVideo.addEventListener('timeupdate', () => {
+            const percentage = (introVideo.currentTime / introVideo.duration) * 100;
+            introSeek.value = percentage;
+        });
+
+        introSeek.addEventListener('input', () => {
+            const time = (introSeek.value / 100) * introVideo.duration;
+            introVideo.currentTime = time;
+        });
+
+        // Project Video Logic (Original Song)
+        projectBtn.addEventListener('click', () => {
+            projectVideo.muted = !projectVideo.muted;
+            projectBtn.textContent = projectVideo.muted ? 'Unmute' : 'Mute';
+        });
+
+        projectVideo.addEventListener('timeupdate', () => {
+            const percentage = (projectVideo.currentTime / projectVideo.duration) * 100;
+            projectSeek.value = percentage;
+        });
+
+        projectSeek.addEventListener('input', () => {
+            const time = (projectSeek.value / 100) * projectVideo.duration;
+            projectVideo.currentTime = time;
         });
 
         function showProjects() {
@@ -626,18 +1055,11 @@
             projectsSubpage.style.display = 'block';
             window.scrollTo(0, 0);
         }
-
         function showMain() {
             projectsSubpage.style.display = 'none';
             mainContent.style.display = 'block';
         }
-        
-        document.addEventListener('contextmenu', event => {
-            if (event.target.tagName === 'VIDEO' || event.target.tagName === 'AUDIO') {
-                event.preventDefault();
-            }
-        });
+        document.addEventListener('contextmenu', e => (e.target.tagName === 'VIDEO' || e.target.tagName === 'AUDIO') && e.preventDefault());
     </script>
-
 </body>
 </html>
