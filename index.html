@@ -71,6 +71,45 @@
             overflow-x: hidden;
             transition: background-color 0.5s, color 0.5s;
         }
+        /* --- MENU HIDING LOGIC --- */
+        nav.nav-hidden {
+            transform: translateY(-100%);
+            pointer-events: none;
+            transition: transform 0.4s ease;
+        }
+
+        .menu-toggle {
+            display: none; /* Hidden on laptop, shown on phone via media query */
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            background: var(--nav-bg);
+            border: 1px solid var(--box-border);
+            padding: 10px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+        }
+
+        .hamburger {
+            width: 20px;
+            height: 2px;
+            background: var(--magenta);
+            position: relative;
+            display: block;
+        }
+
+        .hamburger::before, .hamburger::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 2px;
+            background: var(--magenta);
+            left: 0;
+        }
+
+        .hamburger::before { top: -6px; }
+        .hamburger::after { bottom: -6px; }
 
         /* --- THEME SWITCHER UI --- */
         .theme-switcher-container {
@@ -84,22 +123,25 @@
             font-size: 0.8rem;
             color: var(--green-yellow);
             cursor: pointer;
-            animation: blinkInOut 6s infinite;
+            /* Animation keeps text visible 100% of the time */
+            animation: subtleGlow 3s infinite;
             text-transform: lowercase;
             letter-spacing: 1px;
             white-space: nowrap;
+            margin-left: 1.5rem;
         }
 
         .theme-prompt:hover {
             color: var(--magenta);
             animation: none;
-            opacity: 1 !important;
+            opacity: 1;
         }
 
-        @keyframes blinkInOut {
-            0%, 49% { opacity: 1; }
-            50%, 100% { opacity: 0; }
+        @keyframes subtleGlow {
+            0%, 100% { opacity: 1; text-shadow: 0 0 2px var(--green-yellow); }
+            50% { opacity: 0.7; text-shadow: none; }
         }
+        
 /* --- MINECRAFT MODAL (WITH PREVIEWS) --- */
         #theme-modal-overlay {
             display: none; 
@@ -312,7 +354,7 @@
             100% { clip-path: inset(40% 0 40% 0); transform: translate(0.5px); }
         }
 
-        /* --- LAYOUT --- */
+       /* --- LAYOUT --- */
         nav {
             position: fixed;
             width: 100%;
@@ -327,7 +369,13 @@
             transition: background 0.5s, border-bottom 0.5s;
         }
 
-        nav .nav-left { display: flex; align-items: center; }
+        /* Updated to support mobile stacking */
+        nav .nav-left { 
+            display: flex; 
+            flex-direction: row; 
+            align-items: center; 
+        }
+
         nav .links { display: flex; align-items: center; }
 
         nav .links a {
@@ -464,17 +512,49 @@
 
         footer { padding: 4rem 8%; border-top: 1px solid var(--box-border); font-size: 0.8rem; opacity: 0.8; text-align: center; transition: border-top 0.5s; }
 
-        @media (max-width: 900px) {
+       @media (max-width: 900px) {
+            /* Keep existing layout fixes */
             .split-layout, .media-row, .vertical-media { grid-template-columns: 1fr; gap: 2.5rem; }
             h2, .project-headline-glitch { font-size: 3.5rem; }
             .project-grid { grid-template-columns: 1fr; }
             .image-grid { max-width: 100%; }
-            nav { flex-direction: column; padding: 1.5rem 5%; gap: 1rem; }
-            nav .nav-left { flex-direction: column; gap: 0.5rem; }
-            .theme-switcher-container { margin-left: 0; }
-            nav .links { flex-wrap: wrap; justify-content: center; gap: 15px; }
-            nav .links a { margin-left: 0; }
-            section { padding: 160px 6% 60px 6%; }
+            
+            nav { 
+                flex-direction: column; 
+                padding: 1rem 5%; 
+                gap: 10px;
+                height: auto;
+                align-items: center; 
+            }
+
+            /* FORCE STACK: Moves prompt BELOW logo */
+            nav .nav-left { 
+                flex-direction: column !important; 
+                align-items: center;
+                gap: 2px; 
+                margin: 0;
+            }
+
+            .theme-prompt {
+                margin-left: 0; /* Centers it under logo */
+                font-size: 0.65rem;
+                text-align: center;
+                display: block;
+            }
+
+            nav .links { 
+                flex-wrap: wrap; 
+                justify-content: center; 
+                gap: 8px; 
+                margin-top: 5px;
+            }
+            
+            nav .links a { 
+                margin: 0 8px; 
+                font-size: 0.75rem; 
+            }
+
+            section { padding: 200px 6% 60px 6%; }
         }
 
         @media (max-width: 480px) {
@@ -549,12 +629,10 @@
 
     <canvas id="bg-canvas"></canvas>
 
-    <nav>
+   <nav>
         <div class="nav-left">
             <a href="#home" class="nav-logo" data-text="grainfield" onclick="showMain()">grainfield</a>
-            <div class="theme-switcher-container">
-                <span class="theme-prompt" onclick="openModal()">➔ [click here to change theme]</span>
-            </div>
+            <span class="theme-prompt" onclick="openModal()">[click here to change theme]</span>
         </div>
         <div class="links">
             <a href="#home" onclick="showMain()">Home</a>
@@ -656,7 +734,7 @@
                         <p>Songwriter, Producer</p>
                 </div>
                 <div class="audio-player-container">
-                    <div class="audio-track"><label>darlin' baby</label><audio controls src="darlin' baby.mp3" controlsList="nodownload noplaybackrate"></audio></div>
+                    <div class="audio-track"><label>darlin' baby</label><audio controls src="darlin baby.mp3" controlsList="nodownload noplaybackrate"></audio></div>
                     <div class="audio-track"><label>do you remember</label><audio controls src="do you remember.mp3" controlsList="nodownload noplaybackrate"></audio></div>
                     <div class="audio-track"><label>dont wanna remember</label><audio controls src="dont wanna remember.mp3" controlsList="nodownload noplaybackrate"></audio></div>
                     <div class="audio-track"><label>strawberry sundae</label><audio controls src="strawberry sundae.wav" controlsList="nodownload noplaybackrate"></audio></div>
